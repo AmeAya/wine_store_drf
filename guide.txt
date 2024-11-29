@@ -1,0 +1,24 @@
+#################### Этап 1. Подготовка архитектуры ####################
+# Шаг 1. Установка Django, Django Rest Framework и прочих библиотек.
+pip install django djangorestframework (Терминал)
+
+# Шаг 2. Создаем "ядро" проекта. Ядро проекта это папка с настройками, юрл и пр.
+django-admin startproject core . (Терминал. core - имя папки для ядра)
+# Для djangorestframework нужно добавить 'rest_framework' в settings.py в INSTALLED_APPS
+
+# Шаг 3. Создать приложение(-ия). Имя приложения может быть любым
+python manage.py startapp store (Терминал. store - имя приложения)
+# После создания каждого приложения необходимо добавлять их в settings.py в INSTALLED_APPS
+
+# Шаг 4. В приложениях необходимо продумывать структуру для БД в models.py.
+# Виды полей можно найти по ссылке https://django.fun/docs/django/5.0/ref/models/fields/#field-types
+# У всех видов связей ("ForeignKey", "ManyToManyField", "OneToOneField") есть обязательный параметр on_delete.
+# on_delete -> Параметр определяющий "что делать" если была удалена запись к которой идет связь.
+# models.CASCADE -> Каскадное удаление. При удалении, удаляет все связанные объекты.
+# models.SET_NULL -> Нуль. При удалении, в местах, где была связь ставит null.
+# models.PROTECT -> Защита. Не дает удалить объект, если с ним есть связанные объекты из другой модельки.
+
+# Шаг 5. "Перевести" созданные модельки из python в базу данных.
+# Каждое новое изменение в модельках необходимо переводить в базу.
+python manage.py makemigrations (Терминал)
+python manage.py migrate (Терминал)
