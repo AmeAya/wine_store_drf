@@ -16,7 +16,9 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
+from store.views import *
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('country', CountryApiView.as_view()),  # http://127.0.0.1:8000/country
 ]
