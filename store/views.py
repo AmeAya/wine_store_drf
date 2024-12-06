@@ -18,6 +18,42 @@ class CountryApiView(APIView):
         # .data -> Вытаскиваем данные в виде JSON
         return Response(data=data, status=status.HTTP_200_OK)
 
+    def post(self, request):  # POST запрос служит для создания новый записей
+        country = CountrySerializer(data=request.data)  # Даем JSON, получаем Джанго объект
+        # request.data -> Body, тело запроса, в котором передаются данные
+        if country.is_valid():  # is_valid() - проверяет все ли данные в request.data подходям полям модельки
+            country.save()  # save() - сохраняем объект в базу данных
+            return Response(data={'message': 'OK!'}, status=status.HTTP_200_OK)
+        return Response(data=country.errors, status=status.HTTP_400_BAD_REQUEST)
+        # .errors - Показывает ошибки сериалайзера
+
+    def patch(self, request):  # PATCH запрос служит для изменения уже существующих записей
+        country_id = request.data.get('id')
+        if country_id is None:
+            return Response(data={'message': 'Field "id" is required!'}, status=status.HTTP_400_BAD_REQUEST)
+
+        from django.shortcuts import get_object_or_404
+        country = get_object_or_404(Country, id=country_id)
+        # get_object_or_404(<МОДЕЛЬ>, <УСЛОВИЕ>) - Возвращает объект - одну запись, которая подходит по <УСЛОВИЕ>
+        #                                          из модели <МОДЕЛЬ>
+        # Если найдено меньше 1 записи, то возвращает ответ, что запись не найдена с кодом 404
+        # Если найдено больше 1 записи, то вызывает ошибку MultipleObjectsReturned
+
+        updated_country = CountrySerializer(instance=country, data=request.data, partial=True)
+        # partial -> Если стоит False, то тогда сериалайзер будет требовать все поля
+        # partial -> Если стоит True, то сериалайзер обновляет только те поля, которые есть в request.data
+
+        if updated_country.is_valid():
+            updated_country.save()  # Сохранить запись с обновлениями
+            return Response(data={'message': 'OK!'}, status=status.HTTP_200_OK)
+        return Response(data=updated_country.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        # .objects.get(<УСЛОВИЕ>) -> Возвращает объект - одну запись, которая подходит по <УСЛОВИЕ>
+        # country = Country.objects.get(id=-100)
+        # Если найдено меньше 1 записи, то вызывает ошибку DoesNotExist
+        # country = Country.objects.get(name='Spain')
+        # Если найдено больше 1 записи, то вызывает ошибку MultipleObjectsReturned
+
 
 # class WineByTypeApiView(APIView):
 #     permission_classes = [AllowAny]
@@ -60,3 +96,12 @@ class WineFilterApiView(APIView):
 
         data = WineSerializer(instance=wines, many=True).data
         return Response(data=data, status=status.HTTP_200_OK)
+
+
+# Создать WineApiView, которая будет иметь POST и PATCH.
+# Все поля, которые являются ForeignKey нужно передавать id
+# Например:
+# {
+#   "name": "Cabernet Sauvignon",
+#   "country": 2  <-- 2 потому что, страна Франция имеет второй айди
+# }
