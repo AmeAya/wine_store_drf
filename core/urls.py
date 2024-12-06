@@ -21,4 +21,6 @@ from store.views import *
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('country', CountryApiView.as_view()),  # http://127.0.0.1:8000/country
+    # path('type_wine', WineByTypeApiView.as_view()),
+    path('wine_filter', WineFilterApiView.as_view()),
 ]
