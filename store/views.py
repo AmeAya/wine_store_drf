@@ -1,5 +1,5 @@
 from rest_framework.views import APIView
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
 
@@ -8,7 +8,7 @@ from .serializers import *
 
 
 class CountryApiView(APIView):
-    permission_classes = [AllowAny]  # AllowAny -> Доступна АПИ всем
+    permission_classes = [IsAuthenticated]  # AllowAny -> Доступна АПИ всем
 
     def get(self, request):  # Что делать на GET запрос
         countries = Country.objects.all()  # QuerySet со всеми записями из модели Country
@@ -54,18 +54,14 @@ class CountryApiView(APIView):
         # country = Country.objects.get(name='Spain')
         # Если найдено больше 1 записи, то вызывает ошибку MultipleObjectsReturned
 
-
-# class WineByTypeApiView(APIView):
-#     permission_classes = [AllowAny]
-#
-#     def get(self, request):
-#         wine_type = request.GET.get('type')
-#         # request.GET.get('ПЕРЕМЕННАЯ') -> Возвращает из ГЕТ параметров переменную ПЕРЕМЕННАЯ.
-#         # Если переменной не было, то вернет None
-#         wines = Wine.objects.filter(type=wine_type)
-#         # .objects.filter(<УСЛОВИЕ>) -> QuerySet всех записей которые подходят по условию <УСЛОВИЕ>
-#         data = WineSerializer(instance=wines, many=True).data
-#         return Response(data=data, status=status.HTTP_200_OK)
+    def delete(self, request):
+        country_id = request.data.get('id')
+        if country_id is None:
+            return Response(data={'message': 'Field "id" is required!'}, status=status.HTTP_400_BAD_REQUEST)
+        from django.shortcuts import get_object_or_404
+        country = get_object_or_404(Country, id=country_id)
+        country.delete()  # .delete() -> Метод моделек, который удаляет запись из БД
+        return Response(data={'message': 'OK!'}, status=status.HTTP_200_OK)
 
 
 class WineFilterApiView(APIView):
@@ -98,10 +94,35 @@ class WineFilterApiView(APIView):
         return Response(data=data, status=status.HTTP_200_OK)
 
 
-# Создать WineApiView, которая будет иметь POST и PATCH.
-# Все поля, которые являются ForeignKey нужно передавать id
-# Например:
-# {
-#   "name": "Cabernet Sauvignon",
-#   "country": 2  <-- 2 потому что, страна Франция имеет второй айди
-# }
+class AuthApiView(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request):  # Авторизация делается POST запросом, а не GET
+        from django.contrib.auth import authenticate, login
+
+        email = request.data.get('email')
+        if email is None:
+            return Response(data={'message': 'Field "email" is required!'}, status=status.HTTP_400_BAD_REQUEST)
+        password = request.data.get('password')
+        if password is None:
+            return Response(data={'message': 'Field "password" is required!'}, status=status.HTTP_400_BAD_REQUEST)
+
+        user = authenticate(email=email, password=password)
+        # authenticate -> Хэширует пароль и с имейлом идет проверять, есть ли такой юзер
+        # Если имейл и пароль совпали, то вернет юзера. Иначе, то вернет None
+        if user is None:
+            return Response(data={'message': 'Email and/or Password is not valid!'}, status=status.HTTP_400_BAD_REQUEST)
+
+        login(request, user)
+        # login -> Генерирует ключи доступа, записывает в БД какие ключи принадлежат этому юзеру.
+        # А также, возвращает их обратно юзеру
+
+        return Response(data={'message': 'Welcome'}, status=status.HTTP_200_OK)
+
+
+# 1) Создать APIView для любой модельки
+# 2) В permission_classes указать IsAuthenticated
+#    from rest_framework.permissions import IsAuthenticated
+# 3) Проверить работу этого APIView через постман
+# Без cookie Джанго должен возвращать ошибку с кодом 403 Forbidden
+# После авторизации, запросы должны работать
