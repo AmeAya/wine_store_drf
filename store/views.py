@@ -175,3 +175,32 @@ class MealApiView(APIView):
             'recipe': meal['meals'][0]['strInstructions']
         }
         return Response(data=data, status=status.HTTP_200_OK)
+
+
+class WineSearchApiView(APIView):
+    permission_classes = [AllowAny]
+
+    def get(self, request):
+        name = request.GET.get('name')
+        if name is None:
+            wines = Wine.objects.all()
+        else:
+            wines = Wine.objects.filter(name__icontains=name)
+            # contains -> Чувствителен к регистру.
+            # icontains -> Не чувствителен к регистру.
+
+        data = WineSerializer(instance=wines, many=True).data
+        return Response(data=data, status=status.HTTP_200_OK)
+
+
+from rest_framework.pagination import PageNumberPagination
+class WinePaginatedApiView(APIView):
+    permission_classes = [AllowAny]
+
+    def get(self, request):
+        all_wines = Wine.objects.all()
+        paginator = PageNumberPagination()
+        paginator.page_size = 2
+        wines = paginator.paginate_queryset(all_wines, request)
+        data = WineSerializer(instance=wines, many=True).data
+        return Response(data=data, status=status.HTTP_200_OK)

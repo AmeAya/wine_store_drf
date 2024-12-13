@@ -27,4 +27,6 @@ urlpatterns = [
     path('reg', RegistrationApiView.as_view()),
     path('cab', UserCabinetApiView.as_view()),
     path('meal', MealApiView.as_view()),
+    path('search', WineSearchApiView.as_view()),
+    path('paginator', WinePaginatedApiView.as_view()),
 ]
