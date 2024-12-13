@@ -120,9 +120,58 @@ class AuthApiView(APIView):
         return Response(data={'message': 'Welcome'}, status=status.HTTP_200_OK)
 
 
-# 1) Создать APIView для любой модельки
-# 2) В permission_classes указать IsAuthenticated
-#    from rest_framework.permissions import IsAuthenticated
-# 3) Проверить работу этого APIView через постман
-# Без cookie Джанго должен возвращать ошибку с кодом 403 Forbidden
-# После авторизации, запросы должны работать
+class RegistrationApiView(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        email = request.data.get('email')
+        if email is None:
+            return Response(data={'message': 'Email is required!'}, status=status.HTTP_400_BAD_REQUEST)
+
+        password = request.data.get('password')
+        if password is None:
+            return Response(data={'message': 'Password is required!'}, status=status.HTTP_400_BAD_REQUEST)
+
+        password1 = request.data.get('password1')
+        if password1 is None:
+            return Response(data={'message': 'Password1 is required!'}, status=status.HTTP_400_BAD_REQUEST)
+
+        if password != password1:
+            return Response(data={'message': 'Password and Password1 not match!'}, status=status.HTTP_400_BAD_REQUEST)
+
+        CustomUser.objects.create_user(email=email, password=password)
+        return Response(data={'message': 'User Created!'}, status=status.HTTP_200_OK)
+
+
+class UserCabinetApiView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        # request.user -> Юзер, который отправил запрос на эту АПИ.
+        data = CustomUserSerializer(instance=request.user, many=False).data
+        return Response(data=data, status=status.HTTP_200_OK)
+
+    def patch(self, request):
+        user = CustomUserSerializer(instance=request.user, data=request.data, partial=True)
+        if user.is_valid():
+            user.save()
+            return Response(data=user.data, status=status.HTTP_200_OK)
+        return Response(data=user.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request):
+        request.user.delete()
+        return Response(data={'message': 'Delete!'}, status=status.HTTP_200_OK)
+
+
+class MealApiView(APIView):
+    permission_classes = [AllowAny]
+
+    def get(self, request):
+        import requests  # pip install requests
+        response = requests.get('https://www.themealdb.com/api/json/v1/1/random.php')
+        meal = response.json()
+        data = {
+            'name': meal['meals'][0]['strMeal'],
+            'recipe': meal['meals'][0]['strInstructions']
+        }
+        return Response(data=data, status=status.HTTP_200_OK)

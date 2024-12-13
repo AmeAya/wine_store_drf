@@ -24,4 +24,7 @@ urlpatterns = [
     # path('type_wine', WineByTypeApiView.as_view()),
     path('wine_filter', WineFilterApiView.as_view()),
     path('auth', AuthApiView.as_view()),
+    path('reg', RegistrationApiView.as_view()),
+    path('cab', UserCabinetApiView.as_view()),
+    path('meal', MealApiView.as_view()),
 ]

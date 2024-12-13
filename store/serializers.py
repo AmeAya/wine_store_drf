@@ -13,3 +13,9 @@ class WineSerializer(ModelSerializer):
     class Meta:
         model = Wine
         fields = '__all__'
+
+
+class CustomUserSerializer(ModelSerializer):
+    class Meta:
+        model = CustomUser
+        fields = ['email', 'age', 'number']
