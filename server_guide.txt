@@ -1,0 +1,10 @@
+1) Установить докер на сервер по инструкции:
+   https://docs.docker.com/engine/install/ubuntu/#install-from-a-package
+2) В core/settings.py: ALLOWED_HOSTS - выставить домен или ip адрес сервера(Можно поставить '*')
+3) Установить gunicorn(pip install gunicorn)
+4) Создать список всех использованных библиотек(pip freeze > requirements.txt)
+5) Создать docker-compose.yml(Инструкция для докера, как создать контейнеры)
+6) Настроить Dockerfile для контейнера с Бэкендом
+7) Настроить Dockerfile для контейнера с nginx
+8) Настроить nginx для контейнера с nginx
+9) Залить проект на гит

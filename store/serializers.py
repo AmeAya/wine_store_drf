@@ -14,6 +14,12 @@ class WineSerializer(ModelSerializer):
         model = Wine
         fields = '__all__'
 
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        representation['country'] = instance.country.name
+        representation['type'] = instance.type.name
+        return representation
+
 
 class CustomUserSerializer(ModelSerializer):
     class Meta:

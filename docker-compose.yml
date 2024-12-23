@@ -1,0 +1,37 @@
+version: "3.9"
+services:
+  postgres:
+    image: "postgres:14"
+    restart: unless-stopped
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    environment:
+      POSTGRES_PASSWORD: "5918"
+      POSTGRES_DB: "wine_db"
+    expose:
+      - 5432
+
+  backend:
+    build: .
+    expose:
+      - 8000
+    command: >
+      bash -c "python manage.py makemigrations --noinput && 
+              python manage.py migrate --noinput &&
+              gunicorn core.wsgi:application --bind 0.0.0.0:8000 --workers 1 --threads 4"
+    volumes:
+      - .:/code
+    depends_on:
+      - postgres
+
+  nginx:
+    build: ./nginx
+    ports:
+      - 80:80
+    volumes:
+      - .:/code
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data:
