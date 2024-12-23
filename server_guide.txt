@@ -12,3 +12,5 @@
 11) sudo docker compose up --build -d(Во все следующие разы, чтобы можно было работать в терминале)
 12) sudo docker compose down(Выключить все докер контейнеры)
 13) sudo docker system prune -a(Удалить весь кэш докера)
+14) sudo docker ps(Список всех контейнеров)
+15) sudo docker exec -it CONTAINER_ID sh(CONTAINER_ID это номер контейнера куда хотите зайти)
