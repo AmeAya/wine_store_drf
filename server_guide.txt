@@ -8,3 +8,7 @@
 7) Настроить Dockerfile для контейнера с nginx
 8) Настроить nginx для контейнера с nginx
 9) Залить проект на гит
+10) sudo docker compose up --build(Только 1 раз чтобы он запустился)
+11) sudo docker compose up --build -d(Во все следующие разы, чтобы можно было работать в терминале)
+12) sudo docker compose down(Выключить все докер контейнеры)
+13) sudo docker system prune -a(Удалить весь кэш докера)
